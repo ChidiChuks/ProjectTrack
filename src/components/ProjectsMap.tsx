@@ -1,18 +1,32 @@
 
 import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { useNavigate } from 'react-router-dom';
-import { Project } from '@/types';
 import { getStatusColor, getProjectProgress } from '@/lib/helpers';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
+import { Project } from '@/types';
 
-// Replace with your public Mapbox token or create an input for it
-mapboxgl.accessToken = 'pk.eyJ1IjoiZGVtby11c2VyIiwiYSI6ImNsbjF5cWJ2NjA3aHEya3BpcTcxdGQyYmgifQ.aNhNZWtLJ5Qj-YQE9D0JFg';
+// We'll dynamically import mapbox-gl to avoid issues during build time
+let mapboxgl: any = null;
+
+// Initialize mapbox when component mounts
+const loadMapbox = async () => {
+  try {
+    mapboxgl = await import('mapbox-gl');
+    await import('mapbox-gl/dist/mapbox-gl.css');
+    
+    // Set default token (replace with your public Mapbox token or create an input for it)
+    mapboxgl.default.accessToken = 'pk.eyJ1IjoiZGVtby11c2VyIiwiYSI6ImNsbjF5cWJ2NjA3aHEya3BpcTcxdGQyYmgifQ.aNhNZWtLJ5Qj-YQE9D0JFg';
+    
+    return mapboxgl.default;
+  } catch (error) {
+    console.error("Error loading Mapbox:", error);
+    return null;
+  }
+};
 
 interface ProjectsMapProps {
   projects: Project[];
@@ -20,20 +34,40 @@ interface ProjectsMapProps {
 
 const ProjectsMap = ({ projects }: ProjectsMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>(mapboxgl.accessToken);
+  const map = useRef<any>(null);
+  const [mapboxLoaded, setMapboxLoaded] = useState(false);
+  const [mapboxToken, setMapboxToken] = useState<string>('');
   const [mapLoaded, setMapLoaded] = useState(false);
   const navigate = useNavigate();
 
+  // Load Mapbox
+  useEffect(() => {
+    let isMounted = true;
+    
+    const initMapbox = async () => {
+      const mapboxInstance = await loadMapbox();
+      if (isMounted && mapboxInstance) {
+        setMapboxLoaded(true);
+        setMapboxToken(mapboxInstance.accessToken);
+      }
+    };
+    
+    initMapbox();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    if (!mapboxLoaded || !mapboxgl || !mapContainer.current || map.current) return;
     
     // Skip map initialization if token is not valid
     if (!mapboxToken) return;
 
     try {
-      map.current = new mapboxgl.Map({
+      map.current = new mapboxgl.default.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
         center: [-74.006, 40.7128], // New York City
@@ -47,7 +81,7 @@ const ProjectsMap = ({ projects }: ProjectsMapProps) => {
 
       // Add navigation controls
       map.current.addControl(
-        new mapboxgl.NavigationControl(),
+        new mapboxgl.default.NavigationControl(),
         'bottom-right'
       );
     } catch (error) {
@@ -65,11 +99,11 @@ const ProjectsMap = ({ projects }: ProjectsMapProps) => {
         map.current = null;
       }
     };
-  }, [mapboxToken]);
+  }, [mapboxLoaded, mapboxToken]);
 
   // Add project markers
   useEffect(() => {
-    if (!map.current || !mapLoaded || projects.length === 0) return;
+    if (!map.current || !mapLoaded || projects.length === 0 || !mapboxgl) return;
 
     // Remove existing markers
     const existingMarkers = document.querySelectorAll('.project-marker');
@@ -104,21 +138,24 @@ const ProjectsMap = ({ projects }: ProjectsMapProps) => {
       });
 
       // Add marker to map
-      new mapboxgl.Marker({
+      new mapboxgl.default.Marker({
         element: markerElement
       })
         .setLngLat([project.location.lng, project.location.lat])
-        .addTo(map.current!);
+        .addTo(map.current);
     });
-  }, [projects, mapLoaded, navigate]);
+  }, [projects, mapLoaded, navigate, mapboxLoaded]);
 
   const handleMapboxTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (mapboxgl && mapboxgl.default) {
+      mapboxgl.default.accessToken = e.target.value;
+    }
     setMapboxToken(e.target.value);
   };
 
   return (
     <Card className="w-full overflow-hidden">
-      {!mapboxgl.accessToken && (
+      {(!mapboxLoaded || (mapboxgl && !mapboxgl.default.accessToken)) && (
         <div className="p-4 bg-muted/30 border-b">
           <Label htmlFor="mapboxToken">Mapbox Access Token</Label>
           <div className="relative mt-1.5">
