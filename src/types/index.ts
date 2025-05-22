@@ -1,4 +1,5 @@
 
+
 export interface Project {
   id: string;
   name: string;
@@ -13,6 +14,25 @@ export interface Project {
     lng: number;
     address: string;
   };
+  milestones?: Milestone[];
+  alerts?: Alert[];
+  documents?: Document[];
+  reports?: Report[];
+}
+
+export interface Document {
+  id: string;
+  name: string;
+  type: string;
+  url: string;
+  uploadDate: string;
+}
+
+export interface Report {
+  id: string;
+  name: string;
+  type: string;
+  date: string;
 }
 
 export interface Milestone {
@@ -61,3 +81,4 @@ export interface Tender {
   createdAt: string;
   bids: Bid[];
 }
+

@@ -1,5 +1,4 @@
-
-import { Project, Milestone, Alert, Tender, Bid } from "../types";
+import { Project, Milestone, Alert, Tender, Bid, Document, Report } from "../types";
 
 export const projects: Project[] = [
   {
@@ -231,6 +230,71 @@ export const alerts: Alert[] = [
   }
 ];
 
+export const documents: Document[] = [
+  {
+    id: "doc-001",
+    name: "Transit Hub Design Specification",
+    type: "PDF",
+    url: "#",
+    uploadDate: "2025-02-15"
+  },
+  {
+    id: "doc-002",
+    name: "Environmental Impact Assessment",
+    type: "PDF",
+    url: "#",
+    uploadDate: "2025-01-20"
+  },
+  {
+    id: "doc-003",
+    name: "Site Survey Report",
+    type: "PDF",
+    url: "#",
+    uploadDate: "2024-12-10"
+  },
+  {
+    id: "doc-004",
+    name: "Renovation Blueprint",
+    type: "DWG",
+    url: "#",
+    uploadDate: "2024-11-05"
+  },
+  {
+    id: "doc-005",
+    name: "Budget Allocation Sheet",
+    type: "XLS",
+    url: "#",
+    uploadDate: "2025-01-05"
+  }
+];
+
+export const reports: Report[] = [
+  {
+    id: "rep-001",
+    name: "Monthly Progress Report - April 2025",
+    type: "Status Report",
+    date: "2025-04-30"
+  },
+  {
+    id: "rep-002",
+    name: "Budget Utilization Analysis",
+    type: "Financial Report",
+    date: "2025-04-15"
+  },
+  {
+    id: "rep-003",
+    name: "Contractor Performance Evaluation",
+    type: "Assessment",
+    date: "2025-03-28"
+  },
+  {
+    id: "rep-004",
+    name: "Risk Assessment Update",
+    type: "Risk Report",
+    date: "2025-03-10"
+  }
+];
+
 export const tenders: Tender[] = [
   {
     id: "tender-001",
@@ -331,6 +395,18 @@ export const getMilestonesByProjectId = (projectId: string): Milestone[] => {
 
 export const getAlertsByProjectId = (projectId: string): Alert[] => {
   return alerts.filter(alert => alert.projectId === projectId);
+};
+
+export const getDocumentsByProjectId = (projectId: string): Document[] => {
+  // In a real application, you would filter documents by projectId
+  // For now, we'll return all documents for demo purposes
+  return documents;
+};
+
+export const getReportsByProjectId = (projectId: string): Report[] => {
+  // In a real application, you would filter reports by projectId
+  // For now, we'll return all reports for demo purposes
+  return reports;
 };
 
 export const getTendersByProjectId = (projectId: string): Tender[] => {

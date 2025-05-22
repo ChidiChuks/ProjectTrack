@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,8 @@ import {
   Plus,
 } from "lucide-react";
 import { formatCurrency, formatDate, getStatusColor, calculateProgressPercentage, calculateTimeProgress } from "@/lib/helpers";
+import { getMilestonesByProjectId, getAlertsByProjectId } from "@/data/mockData";
+import { Milestone, Alert, Document, Report } from "@/types";
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
@@ -35,6 +38,16 @@ const ProjectDetail = () => {
 
   const budgetProgress = calculateProgressPercentage(project);
   const timeProgress = calculateTimeProgress(project);
+  
+  // Get milestones for this project
+  const projectMilestones: Milestone[] = project.milestones || getMilestonesByProjectId(project.id);
+  
+  // Get alerts for this project
+  const projectAlerts: Alert[] = project.alerts || getAlertsByProjectId(project.id);
+  
+  // Define empty arrays for documents and reports if they don't exist
+  const projectDocuments: Document[] = project.documents || [];
+  const projectReports: Report[] = project.reports || [];
 
   return (
     <PageLayout>
@@ -127,7 +140,7 @@ const ProjectDetail = () => {
               <CardTitle>Project Timeline</CardTitle>
             </CardHeader>
             <CardContent>
-              <MilestoneTimeline milestones={project.milestones} />
+              <MilestoneTimeline milestones={projectMilestones} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -137,17 +150,17 @@ const ProjectDetail = () => {
               <CardTitle>Project Alerts</CardTitle>
             </CardHeader>
             <CardContent>
-              {project.alerts.length === 0 ? (
+              {projectAlerts.length === 0 ? (
                 <div className="text-center py-4">No alerts found.</div>
               ) : (
                 <ul>
-                  {project.alerts.map((alert) => (
+                  {projectAlerts.map((alert) => (
                     <li key={alert.id} className="py-2 border-b last:border-none">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium">{alert.message}</div>
+                          <div className="font-medium">{alert.title}</div>
                           <div className="text-sm text-muted-foreground">
-                            {formatDate(alert.date)}
+                            {formatDate(alert.createdAt)}
                           </div>
                         </div>
                         <Badge variant="secondary">{alert.type}</Badge>
@@ -165,11 +178,11 @@ const ProjectDetail = () => {
               <CardTitle>Project Documents</CardTitle>
             </CardHeader>
             <CardContent>
-              {project.documents.length === 0 ? (
+              {projectDocuments.length === 0 ? (
                 <div className="text-center py-4">No documents found.</div>
               ) : (
                 <ul>
-                  {project.documents.map((doc) => (
+                  {projectDocuments.map((doc) => (
                     <li key={doc.id} className="py-2 border-b last:border-none">
                       <Link to={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between">
                         <div>
@@ -193,11 +206,11 @@ const ProjectDetail = () => {
               <CardTitle>Project Reports</CardTitle>
             </CardHeader>
             <CardContent>
-              {project.reports.length === 0 ? (
+              {projectReports.length === 0 ? (
                 <div className="text-center py-4">No reports found.</div>
               ) : (
                 <ul>
-                  {project.reports.map((report) => (
+                  {projectReports.map((report) => (
                     <li key={report.id} className="py-2 border-b last:border-none">
                       <div className="flex items-center justify-between">
                         <div>
