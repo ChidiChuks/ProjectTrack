@@ -3,6 +3,9 @@
 
 A comprehensive project management system with GIS integration for public works and infrastructure projects.
 
+![image](https://github.com/user-attachments/assets/a678dda0-dca1-4704-935a-c1fccc43e616)
+
+
 ## Features
 
 - **Interactive Dashboard**: Track project status, budget, and timeline at a glance
